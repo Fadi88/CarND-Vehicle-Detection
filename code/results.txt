@@ -1,0 +1,10 @@
+time for a single image :  3.1687190532684326
+single feature vector is of length :  2188608
+training set for cars is     :  8792  samples
+training set for non cars is :  8968  samples
+time for extracting features for cars is    : 105.24766492843628
+time for extracting features for not cars is : 106.12636756896973
+
+training model took :  19.98959445953369
+0.9774774774774775
+
