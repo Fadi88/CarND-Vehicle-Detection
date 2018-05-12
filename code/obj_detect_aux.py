@@ -11,10 +11,11 @@ def normalize_image(img):
 	return img
 		
 def extract_hist_feature(img):
+	img = cv2.cvtColor(img , cv2.COLOR_BGR2YCrCb)
 	#images are BGR format since they are read by open CV
-	rhist = np.histogram(img[:,:,2] , bins = 32 , range=(-1, 1) )
-	ghist = np.histogram(img[:,:,1] , bins = 32 , range=(-1, 1) )
-	bhist = np.histogram(img[:,:,0] , bins = 32 , range=(-1, 1) )
+	rhist = np.histogram(img[:,:,2] , bins = 32 , range=(0, 256) )
+	ghist = np.histogram(img[:,:,1] , bins = 32 , range=(0, 256) )
+	bhist = np.histogram(img[:,:,0] , bins = 32 , range=(0, 256) )
 
 	return (rhist[0], ghist[0], bhist[0]) , rhist[1]
 
@@ -24,22 +25,22 @@ def extract_hog_feature(img, orient, pix_per_cell, cell_per_block, vis=True, fea
                                   block_norm= 'L2-Hys', transform_sqrt=False, 
                                   visualise= vis, feature_vector= feature_vec)
 def extract_spatial_feature(img):
-	return cv2.resize(img , (32,32)).ravel()
+	color_trsf_img = cv2.cvtColor(img , cv2.COLOR_BGR2YCrCb)	
+	return cv2.resize(color_trsf_img , (16,16)).ravel()
 
 def treat_training_image(img_file , debug = False):
-	
 	image = cv2.imread(img_file)
 	gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
 	
-	image_norm = normalize_image(image)
+	#image_norm = normalize_image(image)
 
-	hist_feature , hist_centers= extract_hist_feature(image_norm)
+	hist_feature , hist_centers= extract_hist_feature(image)
 
-	hog_features, hog_image = extract_hog_feature(gray, orient= 10, 
-                        	pix_per_cell= 8, cell_per_block= 4, 
+	hog_features, hog_image = extract_hog_feature(gray, orient= 9, 
+                        	pix_per_cell= 8, cell_per_block= 2, 
                         	vis=True, feature_vec=True)
 
-	spatial_features = extract_spatial_feature(image_norm)
+	spatial_features = extract_spatial_feature(image)
 
 	if debug == True :
 		file_name = img_file[img_file.rfind('/') + 1 :]
@@ -82,4 +83,8 @@ t0 = time.time()
 tmp = treat_training_image("../test_images/test1.jpg" , True)
 print("time for a single image : " , time.time() - t0)
 print("single feature vector is of length : " , len(tmp))
+
+img = cv2.imread("../training_samples/vehicles/GTI_Far/image0001.png")
+
+print("max read value for training is : " , np.max(img))
 

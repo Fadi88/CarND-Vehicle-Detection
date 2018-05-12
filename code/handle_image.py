@@ -20,3 +20,8 @@ for image_file in test_images:
 	#window for 128 pixel
 	img = cv2.rectangle(img , (588,420) , (1280,570) , (0,255,0) , 1)
 	cv2.imwrite("../output_images/"+ file_name, img)
+
+img[200:500,300:600,:] = (0,0,0)
+
+
+cv2.imwrite("test2.jpg" , img)
