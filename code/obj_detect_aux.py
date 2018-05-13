@@ -26,7 +26,7 @@ def extract_hog_feature(img, orient, pix_per_cell, cell_per_block, vis=True, fea
                                   visualise= vis, feature_vector= feature_vec)
 def extract_spatial_feature(img):
 	color_trsf_img = cv2.cvtColor(img , cv2.COLOR_BGR2YCrCb)	
-	return cv2.resize(color_trsf_img , (16,16)).ravel()
+	return cv2.resize(color_trsf_img , (32,32)).ravel()
 
 def treat_training_image(img_file , debug = False):
 	image = cv2.imread(img_file)
