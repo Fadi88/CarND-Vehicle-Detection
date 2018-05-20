@@ -1,7 +1,8 @@
 from obj_detect_aux import normalize_image
 from obj_detect_aux import treat_training_image
+from scipy.ndimage.measurements import label
+
 import matplotlib as plt
-from random import randint
 import numpy as np
 import pickle
 import glob
@@ -11,6 +12,22 @@ import cv2
 def handle_iamge(img , search_boxes , clf , heat_thres = 1):
 	flt_heatmap = gen_filtered_heat_map(img , search_boxes , clf , heat_thres)
 	cv2.imwrite('../debug/heat_map.jpg' , flt_heatmap)
+
+	labels = label(flt_heatmap)
+	labeled_heatmaps = labels[0]
+	
+	for car_number in range(1, labels[1]+1):
+		# Find pixels with each car_number label value
+		nonzero = (labels[0] == car_number).nonzero()
+		# Identify x and y values of those pixels
+		nonzeroy = np.array(nonzero[0])
+		nonzerox = np.array(nonzero[1])
+		# Define a bounding box based on min/max x and y
+		bbox = ((np.min(nonzerox), np.min(nonzeroy)), (np.max(nonzerox), np.max(nonzeroy)))
+		# Draw the box on the image
+		cv2.rectangle(img, bbox[0], bbox[1], (255,0,0), 2)
+	# Return the image
+	return img
 
 def gen_filtered_heat_map(img , search_boxes , clf , heat_thres = 1):
 
@@ -87,7 +104,10 @@ print("boxes count is : " , len(search_boxes))
 
 clf = pickle.load(open("clf.p" , "rb"))
 
+for img_file in test_images:
 
-img = cv2.imread(test_images[1])
-handle_iamge(img , search_boxes , clf)
+	img = cv2.imread(img_file)	
+	cv2.imwrite( img_file.replace('test_images' , 'output_images'), handle_iamge(img , search_boxes , clf))
+
+
 
