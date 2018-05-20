@@ -28,15 +28,18 @@ def extract_spatial_feature(img):
 	color_trsf_img = cv2.cvtColor(img , cv2.COLOR_BGR2YCrCb)	
 	return cv2.resize(color_trsf_img , (32,32)).ravel()
 
-def treat_training_image(img_file , debug = False):
-	image = cv2.imread(img_file)
+def treat_training_image(img_file , debug = False , file_param = True):
+	if file_param == True:	
+		image = cv2.imread(img_file)
+	else :
+		image = img_file
+
 	gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-	
 	#image_norm = normalize_image(image)
 
 	hist_feature , hist_centers= extract_hist_feature(image)
 
-	hog_features, hog_image = extract_hog_feature(gray, orient= 9, 
+	hog_features, hog_image = extract_hog_feature(gray, orient= 11, 
                         	pix_per_cell= 8, cell_per_block= 2, 
                         	vis=True, feature_vec=True)
 
@@ -74,10 +77,14 @@ def treat_training_image(img_file , debug = False):
 	hist =  (hist  - np.average(hist) ) / (np.max(hist) - np.min(hist) )
 
 	hog_features = (hog_features - np.average(hog_features)) / (np.max(hog_features) - np.min(hog_features))
-
+	
+	
 	spatial_features = (spatial_features-np.average(spatial_features))/(np.max(spatial_features) -np.min(spatial_features))
+	
+	
+	feature_vector = np.concatenate(( hist , hog_features , spatial_features))
 
-	return np.concatenate(( hist , hog_features , spatial_features))
+	return feature_vector
 
 t0 = time.time()
 tmp = treat_training_image("../test_images/test1.jpg" , True)
