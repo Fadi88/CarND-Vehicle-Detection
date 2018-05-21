@@ -33,10 +33,10 @@ y = np.hstack((np.ones(len(car_features)), np.zeros(len(not_car_features))))
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=np.random.randint(0, 100))
 
-print()
 svc = LinearSVC()
 
 t0 = time.time()
+print('feature vector length is :' , len(X_train[0]))
 svc.fit(X_train, y_train)
 
 print("training model took : " , time.time() - t0)

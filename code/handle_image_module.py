@@ -9,7 +9,7 @@ import glob
 import cv2
 
 
-def handle_iamge(img , search_boxes , clf , heat_thres = 1):
+def handle_image(img , search_boxes , clf , heat_thres = 1):
 	flt_heatmap = gen_filtered_heat_map(img , search_boxes , clf , heat_thres)
 	cv2.imwrite('../debug/heat_map.jpg' , flt_heatmap)
 
@@ -62,16 +62,16 @@ search_zone = {}
 
 search_zone['box_size'] = 64
 search_zone['scale'] = 1
-search_zone['upper_left']  = (400,390)
+search_zone['upper_left']  = (500,390)
 search_zone['lower_right'] = (1280,520)
 
-search_zones.append(search_zone)
+#search_zones.append(search_zone)
 
 search_zone = {}
 
 search_zone['box_size'] = 96
 search_zone['scale'] = 1.5
-search_zone['upper_left']  = (400,400)
+search_zone['upper_left']  = (500,400)
 search_zone['lower_right'] = (1280,520)
 
 search_zones.append(search_zone)
@@ -83,10 +83,10 @@ search_zone['scale'] = 2
 search_zone['upper_left']  = (400,400)
 search_zone['lower_right'] = (1280,600)
 
-search_zones.append(search_zone)
+#search_zones.append(search_zone)
 
-x_step = 15
-y_step = 15
+x_step = 30
+y_step = 30
 
 search_boxes = []
 
@@ -104,10 +104,12 @@ print("boxes count is : " , len(search_boxes))
 
 clf = pickle.load(open("clf.p" , "rb"))
 
+pickle.dump(search_boxes , open("search_boxes.p","wb"))
+
 for img_file in test_images:
 
 	img = cv2.imread(img_file)	
-	cv2.imwrite( img_file.replace('test_images' , 'output_images'), handle_iamge(img , search_boxes , clf))
+	cv2.imwrite( img_file.replace('test_images' , 'output_images'), handle_image(img , search_boxes , clf))
 
 
 
