@@ -1,4 +1,3 @@
-from obj_detect_aux import normalize_image
 from obj_detect_aux import treat_training_image
 from scipy.ndimage.measurements import label
 
@@ -72,7 +71,7 @@ search_zone = {}
 search_zone['box_size'] = 96
 search_zone['scale'] = 1.5
 search_zone['upper_left']  = (500,400)
-search_zone['lower_right'] = (1280,520)
+search_zone['lower_right'] = (1280,550)
 
 search_zones.append(search_zone)
 
@@ -85,8 +84,8 @@ search_zone['lower_right'] = (1280,600)
 
 #search_zones.append(search_zone)
 
-x_step = 30
-y_step = 30
+x_step = 15
+y_step = 15
 
 search_boxes = []
 
