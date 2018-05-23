@@ -41,9 +41,7 @@ You're reading it!
 
 The code for this step is contained in "code/obj_detect_aux.py" line 17 as a function and being called in the same file line 41
 
-I started by reading in all the `vehicle` and `non-vehicle` images.  He
-
-After Trails it was found that YCrCb gave a better test score for the calssifer meaning that the data in that color spaces gave more seprations .
+After trials it was found that YCrCb gave a better test score for the calssifer meaning that the data in that color spaces gave more seprations .
 
 Parameters (`orientations`, `pixels_per_cell`, and `cells_per_block`) were chosen not so high in order to reduce overfitting and training time and not so low to make the classfier generalize well to the training set.
 
@@ -54,9 +52,7 @@ Here is an example using the `YCrCb` color space and HOG parameters of `orientat
 
 ![alt text][image8]
 
-#### 2. Explain how you settled on your final choice of HOG parameters.
 
-I tried various combinations of parameters and...
 
 #### 3. Describe how (and identify where in your code) you trained a classifier using your selected HOG features (and color features if you used them).
 
