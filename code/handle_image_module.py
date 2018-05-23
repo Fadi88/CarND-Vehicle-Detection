@@ -70,8 +70,8 @@ search_zone = {}
 
 search_zone['box_size'] = 96
 search_zone['scale'] = 1.5
-search_zone['upper_left']  = (500,400)
-search_zone['lower_right'] = (1280,550)
+search_zone['upper_left']  = (650,400)
+search_zone['lower_right'] = (1280,656)
 
 search_zones.append(search_zone)
 
@@ -80,12 +80,12 @@ search_zone = {}
 search_zone['box_size'] = 128
 search_zone['scale'] = 2
 search_zone['upper_left']  = (400,400)
-search_zone['lower_right'] = (1280,600)
+search_zone['lower_right'] = (1280,656)
 
 #search_zones.append(search_zone)
 
-x_step = 15
-y_step = 15
+x_step = 16
+y_step = 16
 
 search_boxes = []
 
