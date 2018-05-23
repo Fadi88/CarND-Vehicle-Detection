@@ -1,18 +1,17 @@
-## Writeup Template
-### You can use this file as a template for your writeup if you want to submit it as a markdown file, but feel free to use some other method and submit a pdf if you prefer.
-
+## Writeup 
 ---
 
 **Vehicle Detection Project**
 
 The goals / steps of this project are the following:
 
-* Perform a Histogram of Oriented Gradients (HOG) feature extraction on a labeled training set of images and train a classifier Linear SVM classifier
-* Optionally, you can also apply a color transform and append binned color features, as well as histograms of color, to your HOG feature vector. 
-* Note: for those first two steps don't forget to normalize your features and randomize a selection for training and testing.
-* Implement a sliding-window technique and use your trained classifier to search for vehicles in images.
-* Run your pipeline on a video stream (start with the test_video.mp4 and later implement on full project_video.mp4) and create a heat map of recurring detections frame by frame to reject outliers and follow detected vehicles.
-* Estimate a bounding box for vehicles detected.
+* read the training images and divide them into training and testing data in 80/20 
+* all the images(even video frames) are tested to be 0-255 uint8 values so no normalization was needed
+* perform a color transformation to YCrCb color space
+* extract 3 features, Spatial feature (image resized) , hog features and histogram features for the YCrCb image
+* train the classifer and test it
+* sliding-window technique was used to detect cars in the images as a test using heat map as a filtring techinque.
+* the same pipeline is applied to video stream and output video is saved.
 
 [//]: # (Image References)
 [image1]: ./examples/car_not_car.png
@@ -22,6 +21,7 @@ The goals / steps of this project are the following:
 [image5]: ./examples/bboxes_and_heat.png
 [image6]: ./examples/labels_map.png
 [image7]: ./examples/output_bboxes.png
+[image8]: ./debug/hog_test1.jpg
 [video1]: ./project_video.mp4
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/513/view) Points
@@ -34,22 +34,25 @@ The goals / steps of this project are the following:
 
 You're reading it!
 
+## Extracted Features
 ### Histogram of Oriented Gradients (HOG)
 
 #### 1. Explain how (and identify where in your code) you extracted HOG features from the training images.
 
-The code for this step is contained in the first code cell of the IPython notebook (or in lines # through # of the file called `some_file.py`).  
+The code for this step is contained in "code/obj_detect_aux.py" line 17 as a function and being called in the same file line 41
 
-I started by reading in all the `vehicle` and `non-vehicle` images.  Here is an example of one of each of the `vehicle` and `non-vehicle` classes:
+I started by reading in all the `vehicle` and `non-vehicle` images.  He
 
-![alt text][image1]
+After Trails it was found that YCrCb gave a better test score for the calssifer meaning that the data in that color spaces gave more seprations .
 
-I then explored different color spaces and different `skimage.hog()` parameters (`orientations`, `pixels_per_cell`, and `cells_per_block`).  I grabbed random images from each of the two classes and displayed them to get a feel for what the `skimage.hog()` output looks like.
+Parameters (`orientations`, `pixels_per_cell`, and `cells_per_block`) were chosen not so high in order to reduce overfitting and training time and not so low to make the classfier generalize well to the training set.
+
+I grabbed random images from each of the two classes and displayed them to get a feel for what the `skimage.hog()` output looks like.
 
 Here is an example using the `YCrCb` color space and HOG parameters of `orientations=8`, `pixels_per_cell=(8, 8)` and `cells_per_block=(2, 2)`:
 
 
-![alt text][image2]
+![alt text][image8]
 
 #### 2. Explain how you settled on your final choice of HOG parameters.
 
