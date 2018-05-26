@@ -116,7 +116,8 @@ Here's a [link to my video result](./test_video_output.mp4)
 
 #### 2. Describe how (and identify where in your code) you implemented some kind of filter for false positives and some method for combining overlapping bounding boxes.
 
-a heat  with a reasonably high thresolhd was used to filter false postives reuslts 
+a heat  with a reasonably high thresolhd was used to filter false postives reuslts, sliding windows was used on various sizes to ensure diffrent sizes were caputered, even though it gave more false positives
+
 
 ### Here are six frames and their corresponding heatmaps:
 
