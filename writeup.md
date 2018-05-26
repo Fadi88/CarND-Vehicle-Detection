@@ -21,7 +21,19 @@ The goals / steps of this project are the following:
 [image5]: ./examples/bboxes_and_heat.png
 [image6]: ./examples/labels_map.png
 [image7]: ./examples/output_bboxes.png
-[image8]: ./debug/hog_test1.jpg
+[image8]: ./debug/hog_1.jpg
+[image9]: ./debug/hog_0.jpg
+[image10]: ./debug/hist_extra5262.png
+[image11]: ./debug/hist_image0600.png
+[image12]: ./output_images/test1.jpg
+[image13]: ./output_images/test3.jpg
+[image14]: ./output_images/test4.jpg
+[image15]: ./debug/input_159.jpg
+[image16]: ./debug/heat_map_159.jpg
+[image17]: ./debug/input_292.jpg
+[image18]: ./debug/heat_map_292.jpg
+[image19]: ./debug/input_662.jpg
+[image20]: ./debug/heat_map_662.jpg
 [video1]: ./project_video.mp4
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/513/view) Points
@@ -47,55 +59,73 @@ Parameters (`orientations`, `pixels_per_cell`, and `cells_per_block`) were chose
 
 I grabbed random images from each of the two classes and displayed them to get a feel for what the `skimage.hog()` output looks like.
 
-Here is an example using the `YCrCb` color space and HOG parameters of `orientations=8`, `pixels_per_cell=(8, 8)` and `cells_per_block=(2, 2)`:
+Here is an example using the `YCrCb` color space and HOG parameters of `orientations=8`, `pixels_per_cell=(8, 8)` and `cells_per_block=(2, 2)` once for a car sample and one for not car:
 
 
-![alt text][image8]
+![alt text][image8] 
+![alt text][image9]
 
+### Histogram feature
 
+all the channels we histograms were samples to 32 bins and concatenated into a single array "code/obj_detect_aux.py" function called "extract_hist_feature" line 10 called in line 34.
 
-#### 3. Describe how (and identify where in your code) you trained a classifier using your selected HOG features (and color features if you used them).
+sample output
 
-I trained a linear SVM using...
+![alt text][image10]
+![alt text][image11]
+
+### respamled image.
+
+all the images were resampled to 32\*32 (for each channel) and the resulting vector was added to the features vector.
+"code/obj_detect_aux.py" function "extract_spatial_feature" line 21 called in line 44
+
+### normalization 
+finally all the feature were scaled induvadily "code/obj_detect_aux.py" lines 74-80
+
+#### 2. training the classifer.
+
+I trained a linear SVM in file "code/train.py" 
+all trainings data were extracted lines 22 and 27
+stacked toghther in single vector for input and input labels vector line 30-31
+data was divided 80/20 for training and testing in line 33-34
+
+final step the model was fitted with 80% of the data (line 40) score was calcuated (line 43) and classifer was "pickled" to avoid retraining every time (line 45)
 
 ### Sliding Window Search
 
 #### 1. Describe how (and identify where in your code) you implemented a sliding window search.  How did you decide what scales to search and how much to overlap windows?
 
-I decided to search random window positions at random scales all over the image and came up with this (ok just kidding I didn't actually ;):
+the search window were generated in "code/handle_image_module.py" (lines 58-85) mainly by trial and error and starting from the suggested values in the QA video.
 
-![alt text][image3]
+i decided not to go with the HOG smapling once but to recaluate it for every window after cropping because the false postives were already too high with the cropping technique and by sampling the hog it would increase the problem because of the discontinuity at the edge.
 
 #### 2. Show some examples of test images to demonstrate how your pipeline is working.  What did you do to optimize the performance of your classifier?
 
-Ultimately I searched on two scales using YCrCb 3-channel HOG features plus spatially binned color and histograms of color in the feature vector, which provided a nice result.  Here are some example images:
+Ultimately I searched on one scale using YCrCb 3-channel HOG features plus spatially binned color and histograms of color in the feature vector, which provided a nice result.  Here are some example images:
 
-![alt text][image4]
+![alt text][image12]
+![alt text][image13]
+![alt text][image14]
 ---
 
 ### Video Implementation
 
 #### 1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (somewhat wobbly or unstable bounding boxes are ok as long as you are identifying the vehicles most of the time with minimal false positives.)
-Here's a [link to my video result](./project_video.mp4)
+Here's a [link to my video result](./test_video_output.mp4)
 
 
 #### 2. Describe how (and identify where in your code) you implemented some kind of filter for false positives and some method for combining overlapping bounding boxes.
 
-I recorded the positions of positive detections in each frame of the video.  From the positive detections I created a heatmap and then thresholded that map to identify vehicle positions.  I then used `scipy.ndimage.measurements.label()` to identify individual blobs in the heatmap.  I then assumed each blob corresponded to a vehicle.  I constructed bounding boxes to cover the area of each blob detected.  
-
-Here's an example result showing the heatmap from a series of frames of video, the result of `scipy.ndimage.measurements.label()` and the bounding boxes then overlaid on the last frame of video:
+a heat  with a reasonably high thresolhd was used to filter false postives reuslts 
 
 ### Here are six frames and their corresponding heatmaps:
 
-![alt text][image5]
-
-### Here is the output of `scipy.ndimage.measurements.label()` on the integrated heatmap from all six frames:
-![alt text][image6]
-
-### Here the resulting bounding boxes are drawn onto the last frame in the series:
-![alt text][image7]
-
-
+![alt text][image15]
+![alt text][image16]
+![alt text][image17]
+![alt text][image18]
+![alt text][image19]
+![alt text][image20]
 
 ---
 
@@ -103,5 +133,12 @@ Here's an example result showing the heatmap from a series of frames of video, t
 
 #### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
+the major problem is the rate of false postives that were in the video, even though the test images had no issues at all.
+maybe some persistence/averaging filter.time pressure was also a factor because the semster ends in 4 days and something had to be deleviered.
+
+i am also intrested in trying this but with a Yolo network and comapre both results
+
+the fact that the image itself was used is not so good because it will not generlaize well to real life cars, it might have worked on the project because the data were extracted from the video itself 
+
+
 
