@@ -3,15 +3,19 @@ from handle_image_module import *
 
 import pickle
 
-input_video  = '../test_video.mp4'
-output_video = '../test_video_output.mp4'
+test = False
+#test = True
 
-
+if test:
+	input_video  = '../test_video.mp4'
+	output_video = '../test_video_output.mp4'
+else:
+	input_video  = '../project_video.mp4'
+	output_video = '../project_video_output.mp4'
 
 
 def process_frame(frame):
 	global clf
-	global search_boxes
 
 	return find_cars(frame)
 

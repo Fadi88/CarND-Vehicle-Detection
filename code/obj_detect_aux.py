@@ -15,7 +15,7 @@ def extract_hist_feature(img):
 	return (rhist[0], ghist[0], bhist[0]) , rhist[1]
 
 def extract_hog_feature(img, orient, pix_per_cell, cell_per_block, vis=True, feature_vec=True):
-	return hog(img, orientations=orient, pixels_per_cell=(pix_per_cell, pix_per_cell),#block_norm= 'L2-Hys',
+	return hog(img, orientations=orient, pixels_per_cell=(pix_per_cell, pix_per_cell),block_norm= 'L2-Hys',
                                   cells_per_block=(cell_per_block, cell_per_block),transform_sqrt=False, 
                                   visualise= vis, feature_vector= feature_vec)
 def extract_spatial_feature(img):

@@ -36,15 +36,25 @@ def find_possible_cars(img, ystart, ystop, scale, svc):
     # 64 was the orginal sampling rate, with 8 cells and 8 pix per cell
     window = 64
     nblocks_per_window = (window // 8) - 2 + 1
-    cells_per_step = 2  # Instead of overlap, define how many cells to step
-    nxsteps = (nxblocks - nblocks_per_window) // cells_per_step + 1
-    nysteps = (nyblocks - nblocks_per_window) // cells_per_step + 1
+    
+    if scale == 0.5:    
+        cells_per_step = 2
+    elif scale == 0.75:    
+        cells_per_step = 2
+    elif scale == 1:    
+        cells_per_step = 2
+    elif scale == 1.5:
+        cells_per_step = 2
+    elif scale == 2:
+        cells_per_step = 3
+
+    nxsteps = np.int((nxblocks - nblocks_per_window) / cells_per_step + 1)
+    nysteps = np.int((nyblocks - nblocks_per_window) / cells_per_step + 1)
 
     # Compute individual channel HOG features for the entire image
     hog1 = get_hog_features(ch1, 9, 8, 2, feature_vec=False)
     hog2 = get_hog_features(ch2, 9, 8, 2, feature_vec=False)
     hog3 = get_hog_features(ch3, 9, 8, 2, feature_vec=False)
-    x = 0 
 
     for xb in range(nxsteps):
         for yb in range(nysteps):
@@ -72,21 +82,18 @@ def find_possible_cars(img, ystart, ystop, scale, svc):
             hist_features    = (hist_features - np.average(hist_features)) / (np.max(hist_features) - np.min(hist_features))
             hog_features     = (hog_features - np.average(hog_features)) / (np.max(hog_features) - np.min(hog_features))
 
-            test_features    = np.hstack((spatial_features, hist_features, hog_features)).reshape(1, -1)
+            test_features    = np.hstack((hist_features ,  hog_features , spatial_features)).reshape(1, -1)
+            try :
+                test_prediction = svc.predict(test_features)
+            except :
+                continue
+            #test_prediction = svc.predict([treat_training_image(subimg , file_param = False)])
 
-            #test_prediction = svc.predict(test_features)
-            test_prediction = svc.predict([treat_training_image(subimg , file_param = False)])
-            global cnt
             if test_prediction == 1:
                 xbox_left = np.int(xleft*scale)
                 ytop_draw = np.int(ytop*scale)
                 win_draw = np.int(window*scale)
                 ret.append(((xbox_left, ytop_draw+ystart),(xbox_left+win_draw,ytop_draw+win_draw+ystart)))
-                cv2.imwrite( '../debug/video/1/' + str(cnt) + '.jpg', cv2.cvtColor(subimg,cv2.COLOR_YCrCb2RGB))
-            else:
-                cv2.imwrite( '../debug/video/0/' + str(cnt) + '.jpg', cv2.cvtColor(subimg,cv2.COLOR_YCrCb2RGB))
-            cnt += 1
-
     return ret
 
 def handle_image(img , search_boxes , clf , heat_thres = 1):
@@ -110,7 +117,6 @@ def handle_image(img , search_boxes , clf , heat_thres = 1):
 	return img
 
 def gen_filtered_heat_map(img , search_boxes , clf , heat_thres = 1):
-
 	heat_map = np.zeros_like(img[:,:,0])
 
 	for search_box in search_boxes:
@@ -123,17 +129,12 @@ def gen_filtered_heat_map(img , search_boxes , clf , heat_thres = 1):
 	
 		if size != 64:
 			patch = cv2.resize(patch , (64 , 64))
-
-		if clf.predict(treat_training_image(patch , debug=False , file_param = False).reshape(1, -1)) == 1:
-			heat_map[upper_left[1] : lower_right [1]  , upper_left[0] : lower_right [0] ] += 1 	
-
-
-
+		try:	
+			if clf.predict(treat_training_image(patch , debug=False , file_param = False).reshape(1, -1)) == 1:
+				heat_map[upper_left[1] : lower_right [1]  , upper_left[0] : lower_right [0] ] += 1 	
+		except:
+			continue
 	return ((heat_map > heat_thres)*255).astype(np.uint8)
-
-test_images = glob.glob("../test_images/*.jpg")
-
-
 
 
 def find_cars(img):
@@ -143,15 +144,20 @@ def find_cars(img):
 
 	heat_map = np.zeros_like(img[:,:,0])
 
-	#found_Cars.append(find_possible_cars(img , 400 , 656 , 1  , clf))
+	#found_Cars.append(find_possible_cars(img , 400 , 464 , 0.5  , clf))
+	#found_Cars.append(find_possible_cars(img , 400 , 500 , 0.75  , clf))
+	found_Cars.append(find_possible_cars(img , 400 , 528 , 1  , clf))
 	found_Cars.append(find_possible_cars(img , 400 , 656 , 1.5  , clf))
-	#found_Cars.append(find_possible_cars(img , 400 , 560 , 2  , clf))
-	#found_Cars.append(find_possible_cars(img , 400 , 600 , 3  , clf))
+	#found_Cars.append(find_possible_cars(img , 400 , 520 , 1.75  , clf))
+	found_Cars.append(find_possible_cars(img , 400 , 628 , 2  , clf))
+	#found_Cars.append(find_possible_cars(img , 400 , 660 , 2.5  , clf))
+	#found_Cars.append(find_possible_cars(img , 450 , 642 , 3  , clf))
+
 	for size in found_Cars :
 		for rect in size:
 			heat_map[rect[0][1]:rect[1][1] ,rect[0][0]:rect[1][0]] += 1
 			#cv2.rectangle(img, rect[0], rect[1], (255,0,0), 2)
-	heat_map = ((heat_map > 5)*255).astype(np.uint8)
+	heat_map = ((heat_map > 2)*255).astype(np.uint8)
 	
 	labels  = label(heat_map )
 
@@ -164,16 +170,19 @@ def find_cars(img):
 		# Define a bounding box based on min/max x and y
 		bbox = ((np.min(nonzerox), np.min(nonzeroy)), (np.max(nonzerox), np.max(nonzeroy)))
 		# Draw the box on the image
-		cv2.rectangle(img, bbox[0], bbox[1], (255,0,0), 2)
+		if bbox[0][0] < 640 or bbox[1][0] < 640 or bbox[0][0] >= 1200:
+			continue
+		if bbox[0][1] > 600 or (abs(bbox[1][0] - bbox[0][0]) * abs(bbox[1][1] - bbox[0][1])) < 2500:
+			continue
+		cv2.rectangle(img, bbox[0], bbox[1], (125,0,125), 2)
 	# Return the image
 	return img
 
 clf = pickle.load(open("clf.p" , "rb"))
 
+test_images = glob.glob("../test_images/*.jpg")
 for img_file in test_images:
 
 	img = cv2.imread(img_file)	
 	cv2.imwrite( img_file.replace('test_images' , 'output_images'), find_cars(img))
-
-
 
