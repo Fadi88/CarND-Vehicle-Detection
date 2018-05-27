@@ -10,13 +10,10 @@ import pickle
 import glob
 import cv2
 
-cnt = 0
 
 def find_possible_cars(img, ystart, ystop, scale, svc):
 
     ret = []
-
-    global cnt
 
     draw_img = np.copy(img)
     heat_map = np.zeros_like(img[:,:,0])
@@ -49,7 +46,7 @@ def find_possible_cars(img, ystart, ystop, scale, svc):
     elif scale == 1.5:
         cells_per_step = 2
     elif scale == 2:
-        cells_per_step = 3
+        cells_per_step = 2
 
     nxsteps = np.int((nxblocks - nblocks_per_window) / cells_per_step + 1)
     nysteps = np.int((nyblocks - nblocks_per_window) / cells_per_step + 1)
@@ -98,8 +95,6 @@ def find_possible_cars(img, ystart, ystop, scale, svc):
                 ytop_draw = np.int(ytop*scale)
                 win_draw = np.int(window*scale)
                 ret.append(((xbox_left, ytop_draw+ystart),(xbox_left+win_draw,ytop_draw+win_draw+ystart)))
-                cv2.imwrite('../training_samples/non-vehicles/video/' + str(cnt) + '.jpg' , to_save )
-                cnt += 1
     return ret
 
 def handle_image(img , search_boxes , clf , heat_thres = 1):
@@ -151,7 +146,7 @@ def find_cars(img):
 	heat_map = np.zeros_like(img[:,:,0])
 
 	found_Cars.append(find_possible_cars(img , 400 , 464 , 0.5  , clf))
-	#found_Cars.append(find_possible_cars(img , 400 , 500 , 0.75  , clf))
+	found_Cars.append(find_possible_cars(img , 400 , 500 , 0.75  , clf))
 	found_Cars.append(find_possible_cars(img , 400 , 528 , 1  , clf))
 	found_Cars.append(find_possible_cars(img , 400 , 656 , 1.5  , clf))
 	#found_Cars.append(find_possible_cars(img , 400 , 520 , 1.75  , clf))
@@ -163,7 +158,7 @@ def find_cars(img):
 		for rect in size:
 			heat_map[rect[0][1]:rect[1][1] ,rect[0][0]:rect[1][0]] += 1
 			#cv2.rectangle(img, rect[0], rect[1], (255,0,0), 2)
-	heat_map = ((heat_map > 2)*255).astype(np.uint8)
+	heat_map = ((heat_map > 3)*255).astype(np.uint8)
 	
 	labels  = label(heat_map )
 
