@@ -16,6 +16,8 @@ def find_possible_cars(img, ystart, ystop, scale, svc):
 
     ret = []
 
+    global cnt
+
     draw_img = np.copy(img)
     heat_map = np.zeros_like(img[:,:,0])
     ctrans_tosearch = cv2.cvtColor(img[ystart:ystop,:,:], cv2.COLOR_RGB2YCrCb)
@@ -23,6 +25,7 @@ def find_possible_cars(img, ystart, ystop, scale, svc):
     if scale != 1:
         imshape = ctrans_tosearch.shape
         ctrans_tosearch = cv2.resize(ctrans_tosearch, (np.int(imshape[1]/scale), np.int(imshape[0]/scale)))
+        draw_img = cv2.cvtColor(cv2.resize(draw_img, (np.int(imshape[1]/scale), np.int(imshape[0]/scale))) , cv2.COLOR_BGR2RGB )
 
     ch1 = ctrans_tosearch[:,:,0]
     ch2 = ctrans_tosearch[:,:,1]
@@ -71,6 +74,7 @@ def find_possible_cars(img, ystart, ystop, scale, svc):
 
             # Extract the image patch
             subimg = cv2.resize(ctrans_tosearch[ytop:ytop+window, xleft:xleft+window], (64,64))
+            to_save = cv2.resize(draw_img[ytop:ytop+window, xleft:xleft+window], (64,64))
 
             # Get color features
             spatial_features = extract_spatial_feature(subimg)
@@ -83,17 +87,19 @@ def find_possible_cars(img, ystart, ystop, scale, svc):
             hog_features     = (hog_features - np.average(hog_features)) / (np.max(hog_features) - np.min(hog_features))
 
             test_features    = np.hstack((hist_features ,  hog_features , spatial_features)).reshape(1, -1)
+
             try :
                 test_prediction = svc.predict(test_features)
             except :
                 continue
-            #test_prediction = svc.predict([treat_training_image(subimg , file_param = False)])
 
             if test_prediction == 1:
                 xbox_left = np.int(xleft*scale)
                 ytop_draw = np.int(ytop*scale)
                 win_draw = np.int(window*scale)
                 ret.append(((xbox_left, ytop_draw+ystart),(xbox_left+win_draw,ytop_draw+win_draw+ystart)))
+                cv2.imwrite('../training_samples/non-vehicles/video/' + str(cnt) + '.jpg' , to_save )
+                cnt += 1
     return ret
 
 def handle_image(img , search_boxes , clf , heat_thres = 1):
@@ -144,7 +150,7 @@ def find_cars(img):
 
 	heat_map = np.zeros_like(img[:,:,0])
 
-	#found_Cars.append(find_possible_cars(img , 400 , 464 , 0.5  , clf))
+	found_Cars.append(find_possible_cars(img , 400 , 464 , 0.5  , clf))
 	#found_Cars.append(find_possible_cars(img , 400 , 500 , 0.75  , clf))
 	found_Cars.append(find_possible_cars(img , 400 , 528 , 1  , clf))
 	found_Cars.append(find_possible_cars(img , 400 , 656 , 1.5  , clf))
@@ -183,6 +189,6 @@ clf = pickle.load(open("clf.p" , "rb"))
 test_images = glob.glob("../test_images/*.jpg")
 for img_file in test_images:
 
-	img = cv2.imread(img_file)	
-	cv2.imwrite( img_file.replace('test_images' , 'output_images'), find_cars(img))
+	img = cv2.cvtColor(cv2.imread(img_file) , cv2.COLOR_BGR2RGB)	
+	cv2.imwrite( img_file.replace('test_images' , 'output_images'), cv2.cvtColor(find_cars(img) ,cv2.COLOR_RGB2BGR) )
 

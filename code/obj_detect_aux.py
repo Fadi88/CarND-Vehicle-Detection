@@ -30,7 +30,7 @@ def treat_training_image(img_file , debug = False , file_param = True):
 	else :
 		image = img_file
 
-	feature_image = cv2.cvtColor(image, cv2.COLOR_RGB2YCrCb)
+	feature_image = cv2.cvtColor(image, cv2.COLOR_BGR2YCrCb)
 	hist_feature , hist_centers= extract_hist_feature(feature_image)
 	
 	hog_features = []
